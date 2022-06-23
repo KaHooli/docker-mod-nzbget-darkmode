@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+
+echo "**** DarkMode: installing unzip"
+apk add unzip
+
+# git & wget already installed by base docker image

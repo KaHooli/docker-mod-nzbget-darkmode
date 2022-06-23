@@ -1,0 +1,59 @@
+#!/usr/bin/with-contenv bash
+
+# Grab the Darker Nzbget theme CSS archive and extract it
+echo "**** DarkMode: Downloading and extracting the Darker Nzbget theme CSS archive..."
+wget -q -O /tmp/DarkerNZBget.zip https://github.com/ydkmlt84/DarkerNZBget/archive/develop.zip
+unzip -qq -o /tmp/DarkerNZBget.zip -d /tmp/
+
+# Display banner
+cat /tmp/DarkerNZBget-develop/Misc/art.txt
+
+# Create backup dir and make a backup of the existing style.css and icons.png files
+nzbgetDir="/app/nzbget/"
+echo "**** DarkMode: Backing up the original style.css and icons.png files..."
+if [ ! -d "${nzbgetDir}webui/backup" ]; then
+    mkdir -p "${nzbgetDir}webui/backup"
+    yes |cp -rf "${nzbgetDir}webui/style.css" "${nzbgetDir}webui/backup/style.css.original"
+    yes |cp -rf "${nzbgetDir}webui/img/icons.png" "${nzbgetDir}webui/backup/icons.png.original"
+else
+    :
+fi
+
+# Install the DarkerNZBget CSS and icons.png files
+color="black"
+echo "**** DarkMode: Installing the custom CSS and icons files..."
+if [[ -f "${nzbgetDir}webui/backup/style.css.original" && -f "${nzbgetDir}webui/backup/icons.png.original" ]]; then
+    echo "**** DarkMode: Whoops.. Somehow the stock files didn't get backed up..."
+    echo "**** DarkMode: Let's try that again..."
+    yes |cp -rf "${nzbgetDir}webui/style.css" "${nzbgetDir}webui/backup/style.css.original"
+    yes |cp -rf "${nzbgetDir}webui/img/icons.png" "${nzbgetDir}webui/backup/icons.png.original"
+    echo "**** DarkMode: Installing the custom CSS and icons files...again..."
+    yes |cp -rf /tmp/DarkerNZBget-develop/nzbget_custom_darkblue.css "${nzbgetDir}webui/style.css"
+    if [[ "${color}" =~ ^(black|b)$ ]]; then
+        yes |cp -rf /tmp/DarkerNZBget-develop/Misc/black_icons.png "${nzbgetDir}webui/img/icons.png"
+    elif [[ "${color}" =~ ^(white|w)$ ]]; then
+        yes |cp -rf /tmp/DarkerNZBget-develop/Misc/white_icons.png "${nzbgetDir}webui/img/icons.png"
+    fi
+else
+    yes |cp -rf /tmp/DarkerNZBget-develop/nzbget_custom_darkblue.css "${nzbgetDir}webui/style.css"
+    if [[ "${color}" =~ ^(black|b)$ ]]; then
+        yes |cp -rf /tmp/DarkerNZBget-develop/Misc/black_icons.png "${nzbgetDir}webui/img/icons.png"
+    elif [[ "${color}" =~ ^(white|w)$ ]]; then
+        yes |cp -rf /tmp/DarkerNZBget-develop/Misc/white_icons.png "${nzbgetDir}webui/img/icons.png"
+    fi
+fi
+
+# Cleanup downloaded and extracted dirs and files
+echo "**** DarkMode: Tidying some things up..."
+rm -rf /tmp/DarkerNZBget* /tmp/containers_list.txt
+
+# Verify the DarkerNZBget CSS has been installed and display corresponding message(s)
+echo "**** DarkMode: Validating that the DarkerNZBget theme was installed..."
+if grep -q DarkerNZBget "${nzbgetDir}webui/style.css"; then
+    echo "**** DarkMode: The DarkerNZBget theme has been successfully installed!"
+    echo "**** DarkMode: Please refresh your browser window/tab to see the new theme."
+else
+    echo "**** DarkMode: The DarkerNZBget theme has NOT been installed!"
+fi
+
+chown -R abc:abc "${nzbgetDir}webui/"
